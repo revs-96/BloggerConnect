@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Blog - BlogPlatform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-edit me-2"></i>Edit Blog</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.title.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.summary.label(class="form-label") }}
+                            {{ form.summary(class="form-control", rows="3", placeholder="Brief summary of your blog (optional)") }}
+                            {% if form.summary.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.summary.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">This will be displayed in blog listings and previews.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.content.label(class="form-label") }}
+                            {{ form.content(class="form-control", rows="15") }}
+                            {% if form.content.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.content.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Minimum 50 characters required.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_published(class="form-check-input") }}
+                                {{ form.is_published.label(class="form-check-label") }}
+                            </div>
+                            {% if not blog.is_published %}
+                                <div class="form-text">
+                                    <i class="fas fa-coins me-1"></i>
+                                    Publishing this blog will earn you 5 credits!
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Image Upload Section -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-images me-2"></i>Upload Additional Images</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <input type="file" name="images" class="form-control" 
+                                           multiple accept="image/*" id="imageUpload">
+                                    <div class="form-text">
+                                        Upload up to 8 images total (JPG, PNG, GIF, WebP). Max 5MB each.
+                                    </div>
+                                </div>
+                                
+                                {% if blog.images %}
+                                <div class="mt-3">
+                                    <h6>Current Images:</h6>
+                                    <div class="row">
+                                        {% for image in blog.images %}
+                                        <div class="col-md-3 mb-2">
+                                            <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" 
+                                                 class="img-thumbnail" alt="Blog image">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Document Upload Section -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>Upload Documents (Optional)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <input type="file" name="documents" class="form-control" 
+                                           multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.md" id="documentUpload">
+                                    <div class="form-text">
+                                        Upload related documents (PDF, Word, Excel, PowerPoint, Text, ZIP). Max 20MB each.
+                                        Readers will be able to download these documents.
+                                    </div>
+                                </div>
+                                
+                                {% if blog.attachments %}
+                                <div class="mt-3">
+                                    <h6>Current Documents:</h6>
+                                    <ul class="list-group">
+                                        {% for attachment in blog.attachments %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-file me-2"></i>{{ attachment.original_filename }}</span>
+                                            <a href="{{ url_for('download_attachment', attachment_id=attachment.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Blog
+                            </button>
+                            <a href="{{ url_for('view_blog', id=blog.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-eye me-2"></i>Preview
+                            </a>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6><i class="fas fa-info-circle me-2"></i>Blog Information</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <strong>Created:</strong> {{ blog.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <strong>Last Updated:</strong> {{ blog.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include AI Writing Assistant -->
+{% include 'ai_writing_assistant.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Content analysis for edit page
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const titleInput = document.querySelector('input[name="title"]');
+    
+    let analysisTimeout;
+    
+    function analyzeContent() {
+        const content = contentTextarea.value;
+        
+        if (content.length < 50) return;
+        
+        // Simple word count and reading time
+        const words = content.split(/\s+/).length;
+        const readingTime = Math.max(1, Math.round(words / 200));
+        
+        // Update UI with analysis
+        updateContentStats(words, readingTime);
+    }
+    
+    function updateContentStats(words, readingTime) {
+        let statsDiv = document.getElementById('contentStats');
+        if (!statsDiv) {
+            statsDiv = document.createElement('div');
+            statsDiv.id = 'contentStats';
+            statsDiv.className = 'alert alert-info mt-2';
+            contentTextarea.parentNode.appendChild(statsDiv);
+        }
+        
+        statsDiv.innerHTML = `
+            <i class="fas fa-chart-bar me-2"></i>
+            <strong>Content Analysis:</strong> 
+            ${words} words • ${readingTime} min read
+            ${words < 300 ? ' • <span class="text-warning">Consider adding more content for better SEO</span>' : ''}
+        `;
+    }
+    
+    // Event listeners
+    if (contentTextarea) {
+        contentTextarea.addEventListener('input', function() {
+            clearTimeout(analysisTimeout);
+            analysisTimeout = setTimeout(analyzeContent, 1000);
+        });
+        
+        // Initial analysis
+        if (contentTextarea.value.length > 50) {
+            analyzeContent();
+        }
+    }
+    
+    // Form submission with loading state
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

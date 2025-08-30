@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - BlogPlatform{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-primary text-white py-5 mb-5">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">Welcome to BlogPlatform</h1>
+        <p class="lead mb-4">Share your thoughts, earn credits, and connect with fellow writers</p>
+        {% if not current_user.is_authenticated %}
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('create_blog') }}" class="btn btn-light btn-lg">
+                <i class="fas fa-plus me-2"></i>Write New Blog
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    {% if current_user.is_authenticated %}
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-coins fa-2x mb-2"></i>
+                        <h5>Your Credits</h5>
+                        <h2>{{ current_user.credits }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-blog fa-2x mb-2"></i>
+                        <h5>Your Blogs</h5>
+                        <h2>{{ current_user.blogs|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <i class="fas fa-trophy fa-2x mb-2"></i>
+                        <h5>Your Role</h5>
+                        <h2>{{ current_user.role.title() }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-fire me-2"></i>Latest Blogs</h2>
+            <a href="{{ url_for('blog_list') }}" class="btn btn-outline-primary">
+                View All <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        {% if blogs %}
+            <div class="row">
+                {% for blog in blogs %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ blog.title }}</h5>
+                                <p class="card-text text-muted">{{ blog.get_summary() }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ blog.author.full_name }}
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>{{ blog.created_at.strftime('%b %d, %Y') }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{{ url_for('view_blog', id=blog.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>Read More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-blog fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No blogs available yet</h4>
+                <p class="text-muted">Be the first to share your thoughts!</p>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('create_blog') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Write First Blog
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+
+    {% if not current_user.is_authenticated %}
+        <section class="bg-light p-5 rounded mb-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3><i class="fas fa-star me-2"></i>Why Join BlogPlatform?</h3>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Earn credits for every published blog</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Connect with fellow writers</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Simple and intuitive interface</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Free to join and use</li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-center">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket me-2"></i>Join Now
+                    </a>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

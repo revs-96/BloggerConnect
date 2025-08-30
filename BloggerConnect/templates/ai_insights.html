@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}AI Insights - {{ blog.title }} - BloggerConnect{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1><i class="fas fa-brain me-2 text-primary"></i>AI Content Insights</h1>
+                    <p class="text-muted mb-0">Comprehensive AI analysis for: <strong>{{ blog.title }}</strong></p>
+                </div>
+                <div>
+                    <a href="{{ url_for('view_blog', id=blog.id) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-2"></i>View Blog
+                    </a>
+                    <a href="{{ url_for('edit_blog', id=blog.id) }}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Blog
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ insights.quality_analysis.quality_score }}/100</h3>
+                    <p class="mb-0">Quality Score</p>
+                    <small class="text-muted">
+                        {% if insights.quality_analysis.quality_score >= 80 %}
+                            <span class="text-success">Excellent</span>
+                        {% elif insights.quality_analysis.quality_score >= 60 %}
+                            <span class="text-warning">Good</span>
+                        {% else %}
+                            <span class="text-danger">Needs Improvement</span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info">{{ insights.seo_data.seo_score }}/100</h3>
+                    <p class="mb-0">SEO Score</p>
+                    <small class="text-muted">
+                        {% if insights.seo_data.seo_score >= 80 %}
+                            <span class="text-success">Optimized</span>
+                        {% elif insights.seo_data.seo_score >= 60 %}
+                            <span class="text-warning">Good</span>
+                        {% else %}
+                            <span class="text-danger">Needs Work</span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ insights.basic_stats.word_count }}</h3>
+                    <p class="mb-0">Words</p>
+                    <small class="text-muted">{{ (insights.basic_stats.word_count / 200)|round(0, 'ceil')|int }} min read</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ insights.basic_stats.paragraph_count }}</h3>
+                    <p class="mb-0">Paragraphs</p>
+                    <small class="text-muted">{{ insights.basic_stats.sentence_count }} sentences</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Content Quality Analysis -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Content Quality Analysis</h5>
+                </div>
+                <div class="card-body">
+                    {% if insights.quality_analysis.quality_factors %}
+                        <h6>Quality Factors</h6>
+                        <ul class="list-unstyled">
+                            {% for factor in insights.quality_analysis.quality_factors %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>{{ factor }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    <h6 class="mt-4">Structure Analysis</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center mb-2">
+                                {% if insights.quality_analysis.structure_analysis.has_introduction %}
+                                    <i class="fas fa-check text-success me-2"></i>
+                                {% else %}
+                                    <i class="fas fa-times text-danger me-2"></i>
+                                {% endif %}
+                                Introduction
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                {% if insights.quality_analysis.structure_analysis.has_conclusion %}
+                                    <i class="fas fa-check text-success me-2"></i>
+                                {% else %}
+                                    <i class="fas fa-times text-danger me-2"></i>
+                                {% endif %}
+                                Conclusion
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center mb-2">
+                                {% if insights.quality_analysis.structure_analysis.has_examples %}
+                                    <i class="fas fa-check text-success me-2"></i>
+                                {% else %}
+                                    <i class="fas fa-times text-danger me-2"></i>
+                                {% endif %}
+                                Examples
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                {% if insights.quality_analysis.structure_analysis.has_steps %}
+                                    <i class="fas fa-check text-success me-2"></i>
+                                {% else %}
+                                    <i class="fas fa-times text-danger me-2"></i>
+                                {% endif %}
+                                Step-by-step
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-4">Readability Metrics</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Avg Words/Sentence</small>
+                            <div class="fw-bold">{{ insights.quality_analysis.readability_metrics.avg_words_per_sentence }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Avg Sentences/Paragraph</small>
+                            <div class="fw-bold">{{ insights.quality_analysis.readability_metrics.avg_sentences_per_paragraph }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Analysis -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-search me-2"></i>SEO Analysis</h5>
+                </div>
+                <div class="card-body">
+                    {% if insights.seo_data.meta_description %}
+                        <h6>Suggested Meta Description</h6>
+                        <div class="alert alert-info">
+                            <small>{{ insights.seo_data.meta_description }}</small>
+                        </div>
+                    {% endif %}
+                    
+                    {% if insights.seo_data.keyword_density %}
+                        <h6>Top Keywords</h6>
+                        <div class="mb-3">
+                            {% for word, density in insights.seo_data.keyword_density.items() %}
+                                <span class="badge bg-secondary me-1 mb-1">{{ word }} ({{ density }}%)</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if insights.seo_data.internal_links %}
+                        <h6>Internal Linking Opportunities</h6>
+                        <ul class="small">
+                            {% for link in insights.seo_data.internal_links %}
+                                <li>{{ link }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Outline -->
+    {% if insights.content_outline.outline %}
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-list me-2"></i>Content Outline</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for heading in insights.content_outline.outline %}
+                            <div class="mb-2" style="margin-left: {{ (heading.level - 2) * 20 }}px;">
+                                <i class="fas fa-chevron-right me-2 text-muted"></i>
+                                <strong>{{ heading.text }}</strong>
+                            </div>
+                        {% endfor %}
+                        
+                        {% if insights.content_outline.toc_html %}
+                            <div class="mt-4">
+                                <h6>Generated Table of Contents</h6>
+                                {{ insights.content_outline.toc_html|safe }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Suggestions -->
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-lightbulb me-2"></i>AI Improvement Suggestions</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if insights.suggestions %}
+                            <ul class="list-unstyled">
+                                {% for suggestion in insights.suggestions %}
+                                    <li class="mb-3">
+                                        <div class="d-flex">
+                                            <i class="fas fa-robot text-primary me-3 mt-1"></i>
+                                            <div>{{ suggestion }}</div>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                                <p>Great job! No major improvements needed.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Detailed Statistics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Detailed Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-primary">{{ insights.basic_stats.word_count }}</h4>
+                                <small class="text-muted">Total Words</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-info">{{ insights.basic_stats.character_count }}</h4>
+                                <small class="text-muted">Characters</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-success">{{ insights.basic_stats.paragraph_count }}</h4>
+                                <small class="text-muted">Paragraphs</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-warning">{{ insights.basic_stats.sentence_count }}</h4>
+                                <small class="text-muted">Sentences</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6>Content Composition</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-primary" style="width: {{ (insights.basic_stats.word_count / 2000 * 100)|min(100) }}%"></div>
+                            </div>
+                            <small class="text-muted">Word count relative to 2000 words (ideal length)</small>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Structure Score</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" style="width: {{ insights.quality_analysis.quality_score }}%"></div>
+                            </div>
+                            <small class="text-muted">Overall content structure quality</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('edit_blog', id=blog.id) }}" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-edit me-2"></i>Apply Improvements
+            </a>
+            <a href="{{ url_for('view_blog', id=blog.id) }}" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-eye me-2"></i>View Blog
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add tooltips to progress bars
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+        bar.setAttribute('title', `${bar.style.width} complete`);
+    });
+});
+</script>
+{% endblock %}

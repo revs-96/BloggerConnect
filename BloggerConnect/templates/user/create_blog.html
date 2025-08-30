@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+
+{% block title %}Create Blog - BlogPlatform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-plus me-2"></i>Create New Blog</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.title.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.summary.label(class="form-label") }}
+                            {{ form.summary(class="form-control", rows="3", placeholder="Brief summary of your blog (optional)") }}
+                            {% if form.summary.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.summary.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">This will be displayed in blog listings and previews.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.content.label(class="form-label") }}
+                            {{ form.content(class="form-control", rows="15", placeholder="Write your blog content here...") }}
+                            {% if form.content.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.content.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Minimum 50 characters required.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_published(class="form-check-input") }}
+                                {{ form.is_published.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-coins me-1"></i>
+                                Publishing this blog will earn you 5 credits!
+                            </div>
+                        </div>
+                        
+                        <!-- AI Enhancement Options -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-robot me-2"></i>AI Content Enhancement</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    {{ form.auto_enhance(class="form-check-input") }}
+                                    {{ form.auto_enhance.label(class="form-check-label") }}
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.auto_tags(class="form-check-input") }}
+                                    {{ form.auto_tags.label(class="form-check-label") }}
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-robot me-1"></i>
+                                    Powered by Google Gemini AI - improves formatting, structure, and generates relevant tags automatically
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Upload Section -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-images me-2"></i>Upload Images (Optional)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <input type="file" name="images" class="form-control" 
+                                           multiple accept="image/*" id="imageUpload">
+                                    <div class="form-text">
+                                        Upload up to 8 images (JPG, PNG, GIF, WebP). Max 5MB each.
+                                        Images will be automatically optimized and arranged beautifully.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Document Upload Section -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>Upload Documents (Optional)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <input type="file" name="documents" class="form-control" 
+                                           multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.md" id="documentUpload">
+                                    <div class="form-text">
+                                        Upload related documents (PDF, Word, Excel, PowerPoint, Text, ZIP). Max 20MB each.
+                                        Readers will be able to download these documents.
+                                    </div>
+                                </div>
+                                <div id="imagePreview" class="row"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Blog
+                            </button>
+                            <button type="button" class="btn btn-outline-info" id="aiPreviewBtn">
+                                <i class="fas fa-robot me-2"></i>Preview AI Enhancement
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-lightbulb me-2"></i>
+                <strong>Writing Tips:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Write engaging titles to attract readers</li>
+                    <li>Use AI enhancement for better structure and readability</li>
+                    <li>Add images to make your blog more visually appealing</li>
+                    <li>Auto-generated tags help readers discover your content</li>
+                    <li>Published blogs earn you 5 credits immediately</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include AI Writing Assistant -->
+{% include 'ai_writing_assistant.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image upload preview
+    const imageUpload = document.getElementById('imageUpload');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function(e) {
+            imagePreview.innerHTML = '';
+            const files = Array.from(e.target.files);
+            
+            if (files.length > 8) {
+                alert('Maximum 8 images allowed. Only first 8 will be processed.');
+                files.splice(8);
+            }
+            
+            files.forEach((file, index) => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`File ${file.name} is too large. Maximum 5MB allowed.`);
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    alert(`File ${file.name} is not an image.`);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 mb-3';
+                    
+                    col.innerHTML = `
+                        <div class="card">
+                            <img src="${e.target.result}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                            <div class="card-body p-2">
+                                <small class="text-muted">${file.name}</small>
+                                <br>
+                                <small class="text-info">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    imagePreview.appendChild(col);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
+    
+    // AI Enhancement preview
+    const autoEnhanceCheckbox = document.querySelector('input[name="auto_enhance"]');
+    const autoTagsCheckbox = document.querySelector('input[name="auto_tags"]');
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const titleInput = document.querySelector('input[name="title"]');
+    
+    // Real-time content analysis
+    let analysisTimeout;
+    
+    function analyzeContent() {
+        const title = titleInput.value;
+        const content = contentTextarea.value;
+        
+        if (content.length < 50) return;
+        
+        // Simple word count and reading time
+        const words = content.split(/\s+/).length;
+        const readingTime = Math.max(1, Math.round(words / 200));
+        
+        // Update UI with analysis
+        updateContentStats(words, readingTime);
+        
+        // Show AI enhancement preview if enabled
+        if (autoEnhanceCheckbox.checked) {
+            showEnhancementPreview(title, content);
+        }
+    }
+    
+    function updateContentStats(words, readingTime) {
+        let statsDiv = document.getElementById('contentStats');
+        if (!statsDiv) {
+            statsDiv = document.createElement('div');
+            statsDiv.id = 'contentStats';
+            statsDiv.className = 'alert alert-info mt-2';
+            contentTextarea.parentNode.appendChild(statsDiv);
+        }
+        
+        statsDiv.innerHTML = `
+            <i class="fas fa-chart-bar me-2"></i>
+            <strong>Content Analysis:</strong> 
+            ${words} words • ${readingTime} min read
+            ${words < 300 ? ' • <span class="text-warning">Consider adding more content for better SEO</span>' : ''}
+        `;
+    }
+    
+    function showEnhancementPreview(title, content) {
+        // Simple enhancement preview
+        let previewDiv = document.getElementById('enhancementPreview');
+        if (!previewDiv) {
+            previewDiv = document.createElement('div');
+            previewDiv.id = 'enhancementPreview';
+            previewDiv.className = 'alert alert-success mt-2';
+            contentTextarea.parentNode.appendChild(previewDiv);
+        }
+        
+        previewDiv.innerHTML = `
+            <i class="fas fa-robot me-2"></i>
+            <strong>AI Enhancement Preview:</strong>
+            <ul class="mb-0 mt-2">
+                <li>Will add proper headings and structure</li>
+                <li>Improve paragraph formatting</li>
+                <li>Enhance readability and flow</li>
+                ${autoTagsCheckbox.checked ? '<li>Generate relevant tags automatically</li>' : ''}
+            </ul>
+        `;
+    }
+    
+    // Event listeners
+    if (contentTextarea) {
+        contentTextarea.addEventListener('input', function() {
+            clearTimeout(analysisTimeout);
+            analysisTimeout = setTimeout(analyzeContent, 1000);
+        });
+    }
+    
+    if (autoEnhanceCheckbox) {
+        autoEnhanceCheckbox.addEventListener('change', function() {
+            if (this.checked && contentTextarea.value.length > 50) {
+                showEnhancementPreview(titleInput.value, contentTextarea.value);
+            } else {
+                const previewDiv = document.getElementById('enhancementPreview');
+                if (previewDiv) previewDiv.remove();
+            }
+        });
+    }
+    
+    // Form submission with loading state
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+    
+    // Initial analysis if content exists
+    if (contentTextarea && contentTextarea.value.length > 50) {
+        analyzeContent();
+    }
+    
+    // AI Preview functionality
+    const aiPreviewBtn = document.getElementById('aiPreviewBtn');
+    if (aiPreviewBtn) {
+        aiPreviewBtn.addEventListener('click', function() {
+            const title = titleInput.value;
+            const content = contentTextarea.value;
+            
+            if (content.length < 50) {
+                alert('Please write at least 50 characters to preview AI enhancement.');
+                return;
+            }
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Google Gemini AI Processing...';
+            this.disabled = true;
+            
+            // Send AJAX request
+            fetch('/ai_preview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAIPreviewModal(data);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to generate preview'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to generate AI preview. Please try again.');
+            })
+            .finally(() => {
+                // Restore button
+                this.innerHTML = originalText;
+                this.disabled = false;
+            });
+        });
+    }
+    
+    function showAIPreviewModal(data) {
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'aiPreviewModal';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-robot me-2"></i>AI Enhancement Preview
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Original Content</h6>
+                                <div class="border p-3 rounded bg-light" style="max-height: 300px; overflow-y: auto;">
+                                    ${contentTextarea.value.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>AI Enhanced Content</h6>
+                                <div class="border p-3 rounded bg-success bg-opacity-10" style="max-height: 300px; overflow-y: auto;">
+                                    ${data.enhanced_content.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h6>Content Analysis</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Words:</strong> ${data.word_count}</li>
+                                    <li><strong>Reading Time:</strong> ${data.reading_time} min</li>
+                                    <li><strong>Readability Score:</strong> ${data.readability.score}/100</li>
+                                    <li><strong>Grade Level:</strong> ${data.readability.grade_level}</li>
+                                    ${data.quality_score ? `<li><strong>Quality Score:</strong> ${data.quality_score}/100</li>` : ''}
+                                    ${data.ai_powered ? `<li><strong>AI Powered:</strong> <span class="badge bg-success">Yes</span></li>` : ''}
+                                </ul>
+                                
+                                ${data.quality_factors && data.quality_factors.length > 0 ? `
+                                    <h6>Quality Factors</h6>
+                                    <ul class="small text-success">
+                                        ${data.quality_factors.map(factor => `<li><i class="fas fa-check me-1"></i>${factor}</li>`).join('')}
+                                    </ul>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Auto-Generated Tags</h6>
+                                <div class="mb-3">
+                                    ${data.auto_tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join('')}
+                                </div>
+                                
+                                ${data.keyword_density && Object.keys(data.keyword_density).length > 0 ? `
+                                    <h6>Top Keywords</h6>
+                                    <div class="mb-3">
+                                        ${Object.entries(data.keyword_density).slice(0, 5).map(([word, density]) => 
+                                            `<small class="badge bg-info me-1">${word} (${density}%)</small>`
+                                        ).join('')}
+                                    </div>
+                                ` : ''}
+                                
+                                ${data.suggestions.length > 0 ? `
+                                    <h6>AI Suggestions</h6>
+                                    <ul class="small">
+                                        ${data.suggestions.map(suggestion => `<li><i class="fas fa-lightbulb me-1 text-warning"></i>${suggestion}</li>`).join('')}
+                                    </ul>
+                                ` : ''}
+                                
+                                ${data.content_insights && data.content_insights.strengths ? `
+                                    <h6>Content Strengths</h6>
+                                    <ul class="small text-success">
+                                        ${data.content_insights.strengths.map(strength => `<li><i class="fas fa-check me-1"></i>${strength}</li>`).join('')}
+                                    </ul>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        ${data.meta_description ? `
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>Suggested Meta Description</h6>
+                                    <div class="alert alert-info small">
+                                        <i class="fas fa-search me-2"></i>${data.meta_description}
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.content_outline && data.content_outline.outline && data.content_outline.outline.length > 0 ? `
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>Content Outline</h6>
+                                    <div class="small">
+                                        ${data.content_outline.outline.map(heading => 
+                                            `<div class="ms-${(heading.level - 2) * 2}"><i class="fas fa-chevron-right me-1"></i>${heading.text}</div>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success" onclick="applyAIEnhancement()">
+                            <i class="fas fa-check me-2"></i>Apply Enhancement
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Store data for later use
+        window.aiPreviewData = data;
+        
+        // Show modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        // Clean up when modal is hidden
+        modal.addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modal);
+            delete window.aiPreviewData;
+        });
+    }
+    
+    // Global function to apply AI enhancement
+    window.applyAIEnhancement = function() {
+        if (window.aiPreviewData) {
+            contentTextarea.value = window.aiPreviewData.enhanced_content;
+            autoEnhanceCheckbox.checked = true;
+            autoTagsCheckbox.checked = true;
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('aiPreviewModal'));
+            modal.hide();
+            
+            // Show success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+            successDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>AI Enhancement Applied!</strong> Your content has been enhanced with better formatting and structure.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            contentTextarea.parentNode.appendChild(successDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.remove();
+                }
+            }, 5000);
+            
+            // Trigger content analysis
+            analyzeContent();
+        }
+    };
+});
+</script>
+{% endblock %}

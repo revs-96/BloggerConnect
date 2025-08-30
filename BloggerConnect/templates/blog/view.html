@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+
+{% block title %}{{ blog.title }} - BlogPlatform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Blog Header -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title">{{ blog.title }}</h1>
+                    
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle fa-2x text-primary me-3"></i>
+                                <div>
+                                    <strong>{{ blog.author.full_name }}</strong>
+                                    <br><small class="text-muted">@{{ blog.author.username }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ blog.created_at.strftime('%B %d, %Y') }}
+                                <br><i class="fas fa-clock me-1"></i>{{ blog.created_at.strftime('%I:%M %p') }}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Status and Actions -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if blog.is_published %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-eye me-1"></i>Published
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-edit me-1"></i>Draft
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if current_user.is_authenticated and (current_user.id == blog.user_id or current_user.is_admin()) %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('edit_blog', id=blog.id) }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                                <a href="{{ url_for('ai_insights', blog_id=blog.id) }}" class="btn btn-outline-info">
+                                    <i class="fas fa-brain me-1"></i>AI Insights
+                                </a>
+                                <a href="{{ url_for('delete_blog', id=blog.id) }}" 
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('Are you sure you want to delete this blog?')">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Blog Content -->
+            <div class="card">
+                <div class="card-body">
+                    {% if blog.summary %}
+                        <div class="alert alert-light border-start border-primary border-4">
+                            <h6 class="mb-2"><i class="fas fa-quote-left me-2"></i>Summary</h6>
+                            <p class="mb-0">{{ blog.summary }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- AI Enhancement Info - Only visible to blog owner -->
+                    {% if blog.enhanced_content and blog.enhanced_content != blog.content %}
+                        {% if current_user.is_authenticated and (current_user.id == blog.user_id or current_user.is_admin()) %}
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-robot me-2"></i>
+                                <strong>AI Enhanced Content:</strong> This blog has been automatically enhanced for better readability and structure.
+                                {% if blog.readability_score %}
+                                    <br><small>Readability Score: {{ blog.readability_score }}/100</small>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-sparkles me-2"></i>
+                                <strong>Enhanced Content:</strong> This blog has been optimized for better reading experience.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <!-- Featured Image -->
+                    {% if blog.featured_image %}
+                        <div class="featured-image mb-4">
+                            <img src="{{ url_for('static', filename='uploads/' + blog.featured_image) }}" 
+                                 alt="Featured image for {{ blog.title }}" 
+                                 class="img-fluid rounded shadow-sm w-100"
+                                 style="max-height: 400px; object-fit: cover;">
+                        </div>
+                    {% endif %}
+                    
+                    <!-- All Blog Images -->
+                    {% if blog.images %}
+                        <div class="blog-images mb-4">
+                            {% for image in blog.images %}
+                                <div class="blog-image mb-3">
+                                    <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" 
+                                         alt="{{ image.original_filename }}" 
+                                         class="img-fluid rounded shadow-sm w-100"
+                                         style="max-height: 400px; object-fit: cover;">
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">{{ image.original_filename }}</small>
+                                        {% if image.is_featured %}
+                                            <span class="badge bg-primary ms-2">Featured</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="blog-content">
+                        {% if blog.enhanced_content %}
+                            <div class="formatted-content">
+                                {{ blog.enhanced_content|safe }}
+                            </div>
+                        {% else %}
+                            <div class="formatted-content">
+                                {% set formatted_content = blog.content|replace('\n\n', '</p><p>')|replace('\n', '<br>') %}
+                                {% if not formatted_content.startswith('<p>') %}
+                                    <p>{{ formatted_content }}</p>
+                                {% else %}
+                                    {{ formatted_content|safe }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Document Attachments -->
+                    {% if blog.attachments %}
+                        <div class="mt-4">
+                            <h6><i class="fas fa-file-alt me-2"></i>Related Documents</h6>
+                            <div class="list-group">
+                                {% for attachment in blog.attachments %}
+                                    <a href="{{ url_for('download_attachment', attachment_id=attachment.id) }}" 
+                                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-file me-2"></i>
+                                            <span>{{ attachment.original_filename }}</span>
+                                            <small class="text-muted ms-2">
+                                                {% if attachment.file_size < 1024 %}
+                                                    {{ attachment.file_size }} bytes
+                                                {% elif attachment.file_size < 1024 * 1024 %}
+                                                    {{ (attachment.file_size / 1024)|round(1) }} KB
+                                                {% else %}
+                                                    {{ (attachment.file_size / (1024 * 1024))|round(1) }} MB
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <span class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download"></i> Download
+                                        </span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Non-featured Images -->
+                    {% if blog.images %}
+                        {% set non_featured_images = blog.images|rejectattr('is_featured')|list %}
+                        {% if non_featured_images %}
+                            <div class="blog-gallery mt-4">
+                                <h6><i class="fas fa-images me-2"></i>Gallery</h6>
+                                <div class="row">
+                                    {% for image in non_featured_images %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" 
+                                                     alt="{{ image.original_filename }}" 
+                                                     class="card-img-top"
+                                                     style="height: 200px; object-fit: cover;">
+                                                <div class="card-body p-2">
+                                                    <small class="text-muted">{{ image.original_filename }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <!-- Auto-generated Tags -->
+                    {% if blog.tags %}
+                        <div class="blog-tags mt-4">
+                            <h6><i class="fas fa-tags me-2"></i>Tags</h6>
+                            {% for tag in blog.get_tags() %}
+                                <span class="badge bg-secondary me-1 mb-1">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                {% if blog.updated_at != blog.created_at %}
+                                    <i class="fas fa-edit me-1"></i>Last updated: {{ blog.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>By {{ blog.author.full_name }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('blog_list') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to All Blogs
+                </a>
+                
+                {% if current_user.is_authenticated %}
+                    {% if current_user.id == blog.user_id %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
+                        </a>
+                    {% elif current_user.is_admin() %}
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-crown me-2"></i>Admin Dashboard
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Blog Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label small">Author</label>
+                        <p class="mb-0">{{ blog.author.full_name }}</p>
+                        <small class="text-muted">{{ blog.author.role.title() }}</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small">Published Date</label>
+                        <p class="mb-0">{{ blog.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small">Reading Time</label>
+                        {% if blog.reading_time and blog.word_count %}
+                            <p class="mb-0">~{{ blog.reading_time }} min read</p>
+                            <small class="text-muted">{{ blog.word_count }} words</small>
+                        {% else %}
+                            {% set word_count = blog.content.split()|length %}
+                            {% set reading_time = (word_count / 200)|round(0, 'ceil')|int %}
+                            <p class="mb-0">~{{ reading_time }} min read</p>
+                            <small class="text-muted">{{ word_count }} words</small>
+                        {% endif %}
+                    </div>
+                    
+                    {% if blog.readability_score and current_user.is_authenticated and (current_user.id == blog.user_id or current_user.is_admin()) %}
+                        <div class="mb-3">
+                            <label class="form-label small">Readability Score</label>
+                            <p class="mb-0">{{ blog.readability_score }}/100</p>
+                            <small class="text-muted">
+                                {% if blog.readability_score >= 70 %}
+                                    <span class="text-success">Easy to read</span>
+                                {% elif blog.readability_score >= 50 %}
+                                    <span class="text-warning">Standard</span>
+                                {% else %}
+                                    <span class="text-danger">Difficult</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    {% endif %}
+                    
+                    {% if blog.images %}
+                        <div class="mb-3">
+                            <label class="form-label small">Images</label>
+                            <p class="mb-0">{{ blog.images|length }} image{{ 's' if blog.images|length != 1 else '' }}</p>
+                            <small class="text-muted">AI-optimized placement</small>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-0">
+                        <label class="form-label small">Status</label>
+                        <p class="mb-0">
+                            {% if blog.is_published %}
+                                <span class="badge bg-success">Published</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Draft</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Author's Other Blogs -->
+            {% set other_blogs = blog.author.blogs|selectattr('is_published')|selectattr('id', 'ne', blog.id)|list %}
+            {% if other_blogs %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-user-edit me-2"></i>More from {{ blog.author.full_name }}</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for other_blog in other_blogs[:3] %}
+                            <div class="mb-3 {% if not loop.last %}border-bottom pb-3{% endif %}">
+                                <h6 class="mb-1">
+                                    <a href="{{ url_for('view_blog', id=other_blog.id) }}" class="text-decoration-none">
+                                        {{ other_blog.title }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">{{ other_blog.created_at.strftime('%b %d, %Y') }}</small>
+                            </div>
+                        {% endfor %}
+                        
+                        {% if other_blogs|length > 3 %}
+                            <div class="text-center">
+                                <small class="text-muted">{{ other_blogs|length - 3 }} more blogs...</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.formatted-content {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.formatted-content p {
+    margin-bottom: 1.5rem;
+    text-align: justify;
+}
+
+.formatted-content h1, .formatted-content h2, .formatted-content h3, 
+.formatted-content h4, .formatted-content h5, .formatted-content h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.formatted-content h2 {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.formatted-content ul, .formatted-content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+.formatted-content li {
+    margin-bottom: 0.5rem;
+}
+
+.formatted-content blockquote {
+    border-left: 4px solid #007bff;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+}
+
+.formatted-content code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+}
+
+.formatted-content pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.ai-placed-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.image-caption {
+    font-style: italic;
+    color: #6c757d;
+}
+
+.blog-images img {
+    transition: transform 0.3s ease;
+}
+
+.blog-images img:hover {
+    transform: scale(1.02);
+}
+</style>
+{% endblock %}

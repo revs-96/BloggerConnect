@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - BlogPlatform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-tachometer-alt me-2"></i>User Dashboard</h2>
+                <a href="{{ url_for('create_blog') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Write New Blog
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-coins fa-2x mb-2"></i>
+                    <h5>Credits</h5>
+                    <h3>{{ current_user.credits }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-blog fa-2x mb-2"></i>
+                    <h5>Total Blogs</h5>
+                    <h3>{{ blogs|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-eye fa-2x mb-2"></i>
+                    <h5>Published</h5>
+                    <h3>{{ blogs|selectattr('is_published')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit fa-2x mb-2"></i>
+                    <h5>Drafts</h5>
+                    <h3>{{ blogs|rejectattr('is_published')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credit System Info -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Credit System:</strong> Earn 5 credits for each published blog. <strong>Warning:</strong> Deleting published blogs will deduct 5 credits from your account.
+    </div>
+
+    <!-- My Blogs -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>My Blogs</h5>
+        </div>
+        <div class="card-body">
+            {% if blogs %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for blog in blogs %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ blog.title }}</strong>
+                                        {% if blog.summary %}
+                                            <br><small class="text-muted">{{ blog.summary[:100] }}...</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if blog.is_published %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-eye me-1"></i>Published
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-edit me-1"></i>Draft
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ blog.created_at.strftime('%b %d, %Y at %I:%M %p') }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('view_blog', id=blog.id) }}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('edit_blog', id=blog.id) }}" 
+                                               class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('delete_blog', id=blog.id) }}" 
+                                               class="btn btn-outline-danger btn-sm"
+                                               onclick="return confirm('Are you sure you want to delete this blog?{% if blog.is_published %} This will deduct 5 credits from your account.{% endif %}')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-blog fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No blogs yet</h5>
+                    <p class="text-muted">Start writing your first blog and earn credits!</p>
+                    <a href="{{ url_for('create_blog') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Write Your First Blog
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

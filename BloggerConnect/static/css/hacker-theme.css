@@ -1,0 +1,333 @@
+/* Hacker Theme CSS */
+:root {
+    --hacker-bg: #0a0a0a;
+    --hacker-bg-secondary: #111111;
+    --hacker-text: #00ff00;
+    --hacker-text-secondary: #00cc00;
+    --hacker-accent: #ff0040;
+    --hacker-border: #333333;
+    --hacker-glow: #00ff0050;
+}
+
+/* Override Bootstrap theme for hacker theme */
+.theme-hacker {
+    background-color: var(--hacker-bg) !important;
+    color: var(--hacker-text) !important;
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace !important;
+}
+
+.theme-hacker body {
+    background-color: var(--hacker-bg) !important;
+    color: var(--hacker-text) !important;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 64, 0.1) 0%, transparent 50%);
+    background-attachment: fixed;
+}
+
+/* Navigation */
+.theme-hacker .navbar {
+    background-color: var(--hacker-bg-secondary) !important;
+    border-bottom: 2px solid var(--hacker-text);
+    box-shadow: 0 0 10px var(--hacker-glow);
+}
+
+.theme-hacker .navbar-brand,
+.theme-hacker .nav-link {
+    color: var(--hacker-text) !important;
+    text-shadow: 0 0 5px var(--hacker-glow);
+    transition: all 0.3s ease;
+}
+
+.theme-hacker .navbar-brand:hover,
+.theme-hacker .nav-link:hover {
+    color: var(--hacker-accent) !important;
+    text-shadow: 0 0 10px var(--hacker-accent);
+}
+
+.theme-hacker .dropdown-menu {
+    background-color: var(--hacker-bg-secondary) !important;
+    border: 1px solid var(--hacker-text);
+    box-shadow: 0 0 15px var(--hacker-glow);
+}
+
+.theme-hacker .dropdown-item {
+    color: var(--hacker-text) !important;
+    background-color: transparent !important;
+}
+
+.theme-hacker .dropdown-item:hover {
+    background-color: var(--hacker-border) !important;
+    color: var(--hacker-accent) !important;
+}
+
+/* Cards */
+.theme-hacker .card {
+    background-color: var(--hacker-bg-secondary) !important;
+    border: 1px solid var(--hacker-text);
+    box-shadow: 0 0 15px var(--hacker-glow);
+    transition: all 0.3s ease;
+}
+
+.theme-hacker .card:hover {
+    box-shadow: 0 0 25px var(--hacker-glow);
+    transform: translateY(-5px);
+}
+
+.theme-hacker .card-header {
+    background-color: var(--hacker-border) !important;
+    border-bottom: 1px solid var(--hacker-text);
+    color: var(--hacker-text) !important;
+}
+
+.theme-hacker .card-body,
+.theme-hacker .card-text {
+    color: var(--hacker-text) !important;
+}
+
+/* Buttons */
+.theme-hacker .btn-primary {
+    background-color: transparent !important;
+    border: 2px solid var(--hacker-text) !important;
+    color: var(--hacker-text) !important;
+    text-shadow: 0 0 5px var(--hacker-glow);
+    transition: all 0.3s ease;
+}
+
+.theme-hacker .btn-primary:hover {
+    background-color: var(--hacker-text) !important;
+    color: var(--hacker-bg) !important;
+    box-shadow: 0 0 15px var(--hacker-glow);
+}
+
+.theme-hacker .btn-danger {
+    background-color: transparent !important;
+    border: 2px solid var(--hacker-accent) !important;
+    color: var(--hacker-accent) !important;
+    text-shadow: 0 0 5px var(--hacker-accent);
+}
+
+.theme-hacker .btn-danger:hover {
+    background-color: var(--hacker-accent) !important;
+    color: var(--hacker-bg) !important;
+    box-shadow: 0 0 15px var(--hacker-accent);
+}
+
+.theme-hacker .btn-success {
+    background-color: transparent !important;
+    border: 2px solid var(--hacker-text-secondary) !important;
+    color: var(--hacker-text-secondary) !important;
+}
+
+.theme-hacker .btn-success:hover {
+    background-color: var(--hacker-text-secondary) !important;
+    color: var(--hacker-bg) !important;
+}
+
+/* Forms */
+.theme-hacker .form-control,
+.theme-hacker .form-select {
+    background-color: var(--hacker-bg-secondary) !important;
+    border: 1px solid var(--hacker-text) !important;
+    color: var(--hacker-text) !important;
+    box-shadow: inset 0 0 5px var(--hacker-glow);
+}
+
+.theme-hacker .form-control:focus,
+.theme-hacker .form-select:focus {
+    background-color: var(--hacker-bg-secondary) !important;
+    border-color: var(--hacker-accent) !important;
+    box-shadow: 0 0 10px var(--hacker-accent);
+    color: var(--hacker-text) !important;
+}
+
+.theme-hacker .form-label {
+    color: var(--hacker-text) !important;
+    text-shadow: 0 0 3px var(--hacker-glow);
+}
+
+/* Tables */
+.theme-hacker .table {
+    color: var(--hacker-text) !important;
+    border-color: var(--hacker-border) !important;
+}
+
+.theme-hacker .table-dark {
+    background-color: var(--hacker-bg-secondary) !important;
+    border-color: var(--hacker-text) !important;
+}
+
+.theme-hacker .table-hover tbody tr:hover {
+    background-color: var(--hacker-border) !important;
+    color: var(--hacker-accent) !important;
+}
+
+/* Alerts */
+.theme-hacker .alert {
+    background-color: var(--hacker-bg-secondary) !important;
+    border: 1px solid var(--hacker-text) !important;
+    color: var(--hacker-text) !important;
+    box-shadow: 0 0 10px var(--hacker-glow);
+}
+
+.theme-hacker .alert-success {
+    border-color: var(--hacker-text-secondary) !important;
+    color: var(--hacker-text-secondary) !important;
+}
+
+.theme-hacker .alert-danger {
+    border-color: var(--hacker-accent) !important;
+    color: var(--hacker-accent) !important;
+}
+
+/* Badges */
+.theme-hacker .badge {
+    background-color: var(--hacker-text) !important;
+    color: var(--hacker-bg) !important;
+    text-shadow: none;
+    box-shadow: 0 0 5px var(--hacker-glow);
+}
+
+.theme-hacker .badge.bg-primary {
+    background-color: var(--hacker-text) !important;
+}
+
+.theme-hacker .badge.bg-danger {
+    background-color: var(--hacker-accent) !important;
+}
+
+/* Footer */
+.theme-hacker footer {
+    background-color: var(--hacker-bg-secondary) !important;
+    border-top: 2px solid var(--hacker-text);
+    color: var(--hacker-text) !important;
+    box-shadow: 0 0 10px var(--hacker-glow);
+}
+
+/* Text elements */
+.theme-hacker h1, .theme-hacker h2, .theme-hacker h3, 
+.theme-hacker h4, .theme-hacker h5, .theme-hacker h6 {
+    color: var(--hacker-text) !important;
+    text-shadow: 0 0 5px var(--hacker-glow);
+}
+
+.theme-hacker p, .theme-hacker span, .theme-hacker div {
+    color: var(--hacker-text) !important;
+}
+
+.theme-hacker a {
+    color: var(--hacker-text-secondary) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.theme-hacker a:hover {
+    color: var(--hacker-accent) !important;
+    text-shadow: 0 0 5px var(--hacker-accent);
+}
+
+/* Special effects */
+.theme-hacker .hero-section {
+    background: linear-gradient(135deg, var(--hacker-bg), var(--hacker-bg-secondary)) !important;
+    border: 1px solid var(--hacker-text);
+    box-shadow: 0 0 20px var(--hacker-glow);
+}
+
+/* Scrollbar */
+.theme-hacker ::-webkit-scrollbar {
+    width: 12px;
+}
+
+.theme-hacker ::-webkit-scrollbar-track {
+    background: var(--hacker-bg);
+}
+
+.theme-hacker ::-webkit-scrollbar-thumb {
+    background: var(--hacker-text);
+    border-radius: 6px;
+    box-shadow: 0 0 5px var(--hacker-glow);
+}
+
+.theme-hacker ::-webkit-scrollbar-thumb:hover {
+    background: var(--hacker-accent);
+    box-shadow: 0 0 10px var(--hacker-accent);
+}
+
+/* Animation effects */
+@keyframes hackerGlow {
+    0%, 100% { text-shadow: 0 0 5px var(--hacker-glow); }
+    50% { text-shadow: 0 0 15px var(--hacker-glow), 0 0 25px var(--hacker-glow); }
+}
+
+.theme-hacker .navbar-brand {
+    animation: hackerGlow 3s ease-in-out infinite;
+}
+
+/* Code blocks */
+.theme-hacker pre {
+    background-color: var(--hacker-bg) !important;
+    border: 1px solid var(--hacker-text);
+    color: var(--hacker-text) !important;
+    box-shadow: inset 0 0 10px var(--hacker-glow);
+}
+
+.theme-hacker code {
+    background-color: var(--hacker-bg-secondary) !important;
+    color: var(--hacker-text) !important;
+    border: 1px solid var(--hacker-border);
+}
+
+/* List groups */
+.theme-hacker .list-group-item {
+    background-color: var(--hacker-bg-secondary) !important;
+    border-color: var(--hacker-border) !important;
+    color: var(--hacker-text) !important;
+}
+
+.theme-hacker .list-group-item:hover {
+    background-color: var(--hacker-border) !important;
+    color: var(--hacker-accent) !important;
+}
+
+/* Pagination */
+.theme-hacker .page-link {
+    background-color: var(--hacker-bg-secondary) !important;
+    border-color: var(--hacker-text) !important;
+    color: var(--hacker-text) !important;
+}
+
+.theme-hacker .page-link:hover {
+    background-color: var(--hacker-text) !important;
+    color: var(--hacker-bg) !important;
+}
+
+.theme-hacker .page-item.active .page-link {
+    background-color: var(--hacker-accent) !important;
+    border-color: var(--hacker-accent) !important;
+}
+
+/* Modal */
+.theme-hacker .modal-content {
+    background-color: var(--hacker-bg-secondary) !important;
+    border: 2px solid var(--hacker-text);
+    box-shadow: 0 0 30px var(--hacker-glow);
+}
+
+.theme-hacker .modal-header {
+    border-bottom-color: var(--hacker-text) !important;
+}
+
+.theme-hacker .modal-footer {
+    border-top-color: var(--hacker-text) !important;
+}
+
+/* Progress bars */
+.theme-hacker .progress {
+    background-color: var(--hacker-bg-secondary) !important;
+    border: 1px solid var(--hacker-text);
+}
+
+.theme-hacker .progress-bar {
+    background-color: var(--hacker-text) !important;
+    box-shadow: 0 0 10px var(--hacker-glow);
+}

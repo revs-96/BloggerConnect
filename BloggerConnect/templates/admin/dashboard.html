@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - BlogPlatform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-crown me-2"></i>Admin Dashboard</h2>
+                <div class="btn-group">
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-users me-2"></i>Manage Users
+                    </a>
+                    <a href="{{ url_for('create_blog') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Blog
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h5>Total Users</h5>
+                    <h3>{{ total_users }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-blog fa-2x mb-2"></i>
+                    <h5>Total Blogs</h5>
+                    <h3>{{ total_blogs }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-eye fa-2x mb-2"></i>
+                    <h5>Published</h5>
+                    <h3>{{ published_blogs }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit fa-2x mb-2"></i>
+                    <h5>Drafts</h5>
+                    <h3>{{ total_blogs - published_blogs }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Blogs -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Blogs</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_blogs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for blog in recent_blogs %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ blog.title }}</strong>
+                                                {% if blog.summary %}
+                                                    <br><small class="text-muted">{{ blog.summary[:80] }}...</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ blog.author.full_name }}</td>
+                                            <td>
+                                                {% if blog.is_published %}
+                                                    <span class="badge bg-success">Published</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Draft</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>{{ blog.created_at.strftime('%b %d') }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('view_blog', id=blog.id) }}" 
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('edit_blog', id=blog.id) }}" 
+                                                       class="btn btn-outline-secondary btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('delete_blog', id=blog.id) }}" 
+                                                       class="btn btn-outline-danger btn-sm"
+                                                       onclick="return confirm('Are you sure? This will deduct 5 credits from the author if the blog is published.')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center">
+                            <a href="{{ url_for('blog_list') }}" class="btn btn-outline-primary">
+                                View All Blogs <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-blog fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No blogs yet</h6>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & System Info -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                        <a href="{{ url_for('blog_list') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>All Blogs
+                        </a>
+                        <a href="{{ url_for('create_blog') }}" class="btn btn-outline-success">
+                            <i class="fas fa-plus me-2"></i>Create Blog
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>System Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label small">Platform Status</label>
+                        <p class="mb-0">
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i>Online
+                            </span>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small">User Engagement</label>
+                        <div class="progress">
+                            {% set engagement = (published_blogs / total_blogs * 100) if total_blogs > 0 else 0 %}
+                            <div class="progress-bar bg-info" style="width: {{ engagement }}%">
+                                {{ "%.1f"|format(engagement) }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">Published vs Total Blogs</small>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <label class="form-label small">Admin Features</label>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="fas fa-check text-success me-2"></i>User Management</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Blog Moderation</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Credit System</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,381 @@
+<!-- AI Writing Assistant Widget -->
+<div class="card mt-4" id="aiWritingAssistant" style="display: none;">
+    <div class="card-header bg-gradient-primary text-white">
+        <h6 class="mb-0">
+            <i class="fas fa-robot me-2"></i>AI Writing Assistant
+            <button type="button" class="btn btn-sm btn-outline-light float-end" onclick="toggleAIAssistant()">
+                <i class="fas fa-times"></i>
+            </button>
+        </h6>
+    </div>
+    <div class="card-body">
+        <div id="aiSuggestions">
+            <div class="text-center text-muted">
+                <i class="fas fa-pen-fancy fa-2x mb-2"></i>
+                <p>Start writing to get AI suggestions...</p>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="generateTitle()">
+                    <i class="fas fa-heading me-1"></i>Title Ideas
+                </button>
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="generateOutline()">
+                    <i class="fas fa-list me-1"></i>Outline
+                </button>
+                <button type="button" class="btn btn-outline-info btn-sm" onclick="improveContent()">
+                    <i class="fas fa-magic me-1"></i>Improve
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating AI Assistant Button -->
+<div class="position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
+    <button type="button" class="btn btn-primary btn-lg rounded-circle shadow" 
+            id="aiAssistantToggle" onclick="toggleAIAssistant()" title="AI Writing Assistant">
+        <i class="fas fa-robot"></i>
+    </button>
+</div>
+
+<script>
+let aiAssistantVisible = false;
+let suggestionTimeout;
+
+function toggleAIAssistant() {
+    const assistant = document.getElementById('aiWritingAssistant');
+    const toggle = document.getElementById('aiAssistantToggle');
+    
+    if (aiAssistantVisible) {
+        assistant.style.display = 'none';
+        toggle.innerHTML = '<i class="fas fa-robot"></i>';
+        aiAssistantVisible = false;
+    } else {
+        assistant.style.display = 'block';
+        toggle.innerHTML = '<i class="fas fa-times"></i>';
+        aiAssistantVisible = true;
+        updateAISuggestions();
+    }
+}
+
+function updateAISuggestions() {
+    if (!aiAssistantVisible) return;
+    
+    const titleInput = document.querySelector('input[name="title"]');
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const suggestionsDiv = document.getElementById('aiSuggestions');
+    
+    const title = titleInput ? titleInput.value : '';
+    const content = contentTextarea ? contentTextarea.value : '';
+    
+    if (content.length < 20) {
+        suggestionsDiv.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-pen-fancy fa-2x mb-2"></i>
+                <p>Start writing to get AI suggestions...</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Real-time suggestions based on content
+    const suggestions = generateRealTimeSuggestions(title, content);
+    displaySuggestions(suggestions);
+}
+
+function generateRealTimeSuggestions(title, content) {
+    const suggestions = [];
+    const words = content.split(/\s+/).length;
+    const sentences = content.split(/[.!?]+/).length - 1;
+    const paragraphs = content.split(/\n\s*\n/).length;
+    
+    // Content length suggestions
+    if (words < 100) {
+        suggestions.push({
+            type: 'length',
+            icon: 'fas fa-expand-arrows-alt',
+            text: 'Consider expanding your content. Aim for at least 300 words for better SEO.',
+            action: 'expandContent'
+        });
+    } else if (words > 2000) {
+        suggestions.push({
+            type: 'length',
+            icon: 'fas fa-compress-arrows-alt',
+            text: 'Your content is quite long. Consider breaking it into multiple posts.',
+            action: 'splitContent'
+        });
+    }
+    
+    // Structure suggestions
+    if (paragraphs < 3 && words > 150) {
+        suggestions.push({
+            type: 'structure',
+            icon: 'fas fa-paragraph',
+            text: 'Add more paragraph breaks to improve readability.',
+            action: 'addParagraphs'
+        });
+    }
+    
+    // Heading suggestions
+    if (!content.includes('#') && words > 200) {
+        suggestions.push({
+            type: 'headings',
+            icon: 'fas fa-heading',
+            text: 'Add section headings to organize your content better.',
+            action: 'addHeadings'
+        });
+    }
+    
+    // Introduction/conclusion suggestions
+    const hasIntro = /^(introduction|intro|overview|welcome)/i.test(content);
+    const hasConclusion = /(conclusion|summary|final|in summary)/i.test(content);
+    
+    if (!hasIntro && words > 200) {
+        suggestions.push({
+            type: 'intro',
+            icon: 'fas fa-play',
+            text: 'Consider adding an introduction to hook your readers.',
+            action: 'addIntroduction'
+        });
+    }
+    
+    if (!hasConclusion && words > 300) {
+        suggestions.push({
+            type: 'conclusion',
+            icon: 'fas fa-flag-checkered',
+            text: 'Add a conclusion to summarize your key points.',
+            action: 'addConclusion'
+        });
+    }
+    
+    // SEO suggestions
+    if (title && !content.toLowerCase().includes(title.toLowerCase().split(' ')[0])) {
+        suggestions.push({
+            type: 'seo',
+            icon: 'fas fa-search',
+            text: 'Include your main keyword from the title in the content.',
+            action: 'improveKeywords'
+        });
+    }
+    
+    return suggestions.slice(0, 4); // Limit to 4 suggestions
+}
+
+function displaySuggestions(suggestions) {
+    const suggestionsDiv = document.getElementById('aiSuggestions');
+    
+    if (suggestions.length === 0) {
+        suggestionsDiv.innerHTML = `
+            <div class="text-center text-success">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <p>Great job! Your content looks good.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="ai-suggestions">';
+    suggestions.forEach(suggestion => {
+        html += `
+            <div class="suggestion-item mb-3 p-2 border-start border-3 border-primary bg-light">
+                <div class="d-flex align-items-start">
+                    <i class="${suggestion.icon} text-primary me-2 mt-1"></i>
+                    <div class="flex-grow-1">
+                        <small class="text-muted text-uppercase">${suggestion.type}</small>
+                        <p class="mb-1 small">${suggestion.text}</p>
+                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                                onclick="applySuggestion('${suggestion.action}')">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    suggestionsDiv.innerHTML = html;
+}
+
+function applySuggestion(action) {
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const titleInput = document.querySelector('input[name="title"]');
+    
+    if (!contentTextarea) return;
+    
+    let content = contentTextarea.value;
+    const cursorPos = contentTextarea.selectionStart;
+    
+    switch (action) {
+        case 'addIntroduction':
+            const intro = `## Introduction\n\nWelcome to this comprehensive guide. In this article, we'll explore the key concepts and provide you with practical insights.\n\n`;
+            contentTextarea.value = intro + content;
+            break;
+            
+        case 'addConclusion':
+            const conclusion = `\n\n## Conclusion\n\nIn summary, we've covered the essential points that will help you achieve your goals. Remember to apply these concepts in your own projects and continue learning.\n\nWhat are your thoughts on this topic? Feel free to share your experiences in the comments below!`;
+            contentTextarea.value = content + conclusion;
+            break;
+            
+        case 'addHeadings':
+            // Simple heading suggestion
+            const headingText = prompt('Enter a heading for this section:');
+            if (headingText) {
+                const beforeCursor = content.substring(0, cursorPos);
+                const afterCursor = content.substring(cursorPos);
+                contentTextarea.value = beforeCursor + `\n\n## ${headingText}\n\n` + afterCursor;
+            }
+            break;
+            
+        case 'addParagraphs':
+            // Add paragraph breaks at sentence endings
+            content = content.replace(/\. ([A-Z])/g, '.\n\n$1');
+            contentTextarea.value = content;
+            break;
+            
+        case 'expandContent':
+            const expansion = `\n\nLet me elaborate on this topic further. Here are some additional points to consider:\n\n- Key point 1: [Add your insight here]\n- Key point 2: [Add your insight here]\n- Key point 3: [Add your insight here]\n\nThese aspects are important because they help provide a more comprehensive understanding of the subject.`;
+            contentTextarea.value = content + expansion;
+            break;
+    }
+    
+    // Trigger content analysis update
+    contentTextarea.dispatchEvent(new Event('input'));
+    
+    // Update suggestions
+    setTimeout(updateAISuggestions, 500);
+}
+
+function generateTitle() {
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const titleInput = document.querySelector('input[name="title"]');
+    
+    if (!contentTextarea || !titleInput) return;
+    
+    const content = contentTextarea.value;
+    if (content.length < 50) {
+        alert('Please write some content first to generate title suggestions.');
+        return;
+    }
+    
+    // Simple title generation based on content
+    const words = content.toLowerCase().split(/\s+/);
+    const commonWords = ['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how', 'man', 'new', 'now', 'old', 'see', 'two', 'way', 'who'];
+    const keywords = words.filter(word => word.length > 3 && !commonWords.includes(word));
+    
+    const titleSuggestions = [
+        `Complete Guide to ${keywords[0] || 'Your Topic'}`,
+        `How to Master ${keywords[0] || 'Your Topic'}: A Step-by-Step Guide`,
+        `${keywords[0] || 'Your Topic'}: Tips and Best Practices`,
+        `Understanding ${keywords[0] || 'Your Topic'}: Everything You Need to Know`,
+        `The Ultimate ${keywords[0] || 'Your Topic'} Tutorial`
+    ];
+    
+    const selectedTitle = prompt('Choose a title or edit one:\n\n' + titleSuggestions.map((t, i) => `${i+1}. ${t}`).join('\n\n') + '\n\nEnter your choice (1-5) or type a custom title:');
+    
+    if (selectedTitle) {
+        const choiceNum = parseInt(selectedTitle);
+        if (choiceNum >= 1 && choiceNum <= 5) {
+            titleInput.value = titleSuggestions[choiceNum - 1];
+        } else {
+            titleInput.value = selectedTitle;
+        }
+    }
+}
+
+function generateOutline() {
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    
+    if (!contentTextarea) return;
+    
+    const outline = `## Introduction
+Brief overview of the topic and what readers will learn.
+
+## Main Content
+### Section 1: Key Concept
+Explain the first important concept with examples.
+
+### Section 2: Practical Application
+Show how to apply the concepts in real scenarios.
+
+### Section 3: Advanced Tips
+Share advanced techniques and best practices.
+
+## Conclusion
+Summarize key points and provide next steps.
+
+---
+
+Replace this outline with your actual content, keeping the structure for better organization.`;
+    
+    if (contentTextarea.value.length < 50) {
+        contentTextarea.value = outline;
+    } else {
+        if (confirm('This will replace your current content with an outline. Continue?')) {
+            contentTextarea.value = outline;
+        }
+    }
+    
+    contentTextarea.dispatchEvent(new Event('input'));
+}
+
+function improveContent() {
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const titleInput = document.querySelector('input[name="title"]');
+    
+    if (!contentTextarea) return;
+    
+    const content = contentTextarea.value;
+    if (content.length < 50) {
+        alert('Please write some content first to get improvement suggestions.');
+        return;
+    }
+    
+    // Show the AI preview modal instead
+    const aiPreviewBtn = document.getElementById('aiPreviewBtn');
+    if (aiPreviewBtn) {
+        aiPreviewBtn.click();
+    } else {
+        alert('AI enhancement is available when creating or editing blogs.');
+    }
+}
+
+// Auto-update suggestions when content changes
+document.addEventListener('DOMContentLoaded', function() {
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    if (contentTextarea) {
+        contentTextarea.addEventListener('input', function() {
+            clearTimeout(suggestionTimeout);
+            suggestionTimeout = setTimeout(updateAISuggestions, 2000);
+        });
+    }
+});
+</script>
+
+<style>
+.suggestion-item {
+    transition: all 0.3s ease;
+}
+
+.suggestion-item:hover {
+    background-color: #f8f9fa !important;
+    transform: translateX(5px);
+}
+
+#aiAssistantToggle {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.ai-suggestions {
+    max-height: 300px;
+    overflow-y: auto;
+}
+</style>
