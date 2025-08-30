@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:admin123@db:5432/BlogConnectDB
+      - FLASK_APP=BloggerConnect/main.py
+      - FLASK_RUN_HOST=0.0.0.0
+    depends_on:
+      - db
+    volumes:
+      - ./BloggerConnect:/app/BloggerConnect
+      - ./static:/app/static
+
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: BlogConnectDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
